@@ -13,9 +13,20 @@ let paymentMethods = [
 
 const onChange = (idx) => {
     paymentMethods[idx].active = !paymentMethods[idx].active
-    console.log(paymentMethods)
     render()
 }
+
+let detailItems = [
+    {label: 'Description', value: 'Test Total', key: 'label'},
+    {label: 'Currency', value: 'CAD', key: 'currency'},
+    {label: 'Amount', value: '10.50', key: 'value'}
+]
+
+const onDetailChange = (idx, {target}) => {
+    detailItems[idx].value = target.value
+    render()
+}
+
 
 const onInitiate = () => {
     result = null
@@ -32,10 +43,14 @@ const onInitiate = () => {
             return arr
         }, [])
     }]
-    console.log(supportedInstruments)
+
+    const detailDigest = detailItems.reduce((digest, {key, value}) => {
+        digest[key] = value
+        return digest
+    }, {})
 
     let details = {
-        total: {label: 'Test total', amount: {currency: 'CAD', value: '10.50'}}
+        total: {label: detailDigest.label, amount: {currency: detailDigest.currency, value: detailDigest.value}}
     }
 
     let request = new PaymentRequest(supportedInstruments, details)
@@ -56,6 +71,6 @@ const onInitiate = () => {
 }
 
 let render = () => {
-    ReactDOM.render(<App onInitiate={onInitiate} error={error} result={result} paymentMethods={paymentMethods} onChange={onChange} />, document.getElementById('root'));
+    ReactDOM.render(<App onInitiate={onInitiate} error={error} result={result} paymentMethods={paymentMethods} onChange={onChange} details={detailItems} onDetailChange={onDetailChange} />, document.getElementById('root'));
 }
 render()

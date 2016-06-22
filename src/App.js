@@ -22,11 +22,26 @@ const PaymentMethodSelector = ({methods, onChange}) => {
     )
 }
 
-const AmountEditor = () => {
+const AmountEditorItem = ({label, value, onChange}) => {
+    return (
+        <li>
+            <label>
+                {label}
+                <input type='text' onChange={onChange} value={value} />
+            </label>
+        </li>
+    )
+}
+
+
+const AmountEditor = ({details, onChange}) => {
     return (
         <div>
             <h2>Specify amount:</h2>
-            <p> 10.50 CAD</p>
+            <ul>
+                {details.map((detail, idx) =>
+                <AmountEditorItem key={idx} {...detail} onChange={onChange.bind(null, idx)} />)}
+        </ul>
         </div>
     )
 }
@@ -53,12 +68,12 @@ const ResultDisplay = ({result}) => {
     )
 }
 
-const App = ({onInitiate, error, result, paymentMethods, onChange}) => {
+const App = ({onInitiate, error, result, paymentMethods, details, onChange, onDetailChange}) => {
     return (
         <div>
             <h1>Web Payments Test</h1>
             <PaymentMethodSelector methods={paymentMethods} onChange={onChange} />
-            <AmountEditor />
+            <AmountEditor details={details} onChange={onDetailChange} />
             <PaymentRequestor onInitiate={onInitiate}/>
             {error && <ErrorDisplay error={error} />}
             {result && <ResultDisplay result={result} />}
