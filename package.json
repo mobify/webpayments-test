@@ -1,5 +1,5 @@
 {
-    "name": "webpayments-test",
+  "name": "webpayments-test",
   "version": "1.0.0",
   "description": "Test app for Web Payments API",
   "scripts": {

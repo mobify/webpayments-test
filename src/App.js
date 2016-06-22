@@ -27,7 +27,7 @@ const AmountEditorItem = ({label, value, onChange}) => {
         <li>
             <label>
                 {label}
-                <input type='text' onChange={onChange} value={value} />
+                <input type='text' onChange={onChange} value={value} style={{'margin-left': "0.5em"}}/>
             </label>
         </li>
     )
@@ -60,10 +60,15 @@ const ErrorDisplay = ({error}) => {
     )
 }
 
-const ResultDisplay = ({result}) => {
+const ResultDisplay = ({cardholderName, cardNumber, expiryMonth, expiryYear, cardSecurityCode}) => {
     return (
         <div style={{border: '1px solid green', margin: '1em', padding: '1em'}}>
-            {JSON.stringify(result, null, 4)}
+            <ul>
+                <li>Cardholder Name: {cardholderName}</li>
+                <li>Card Number: {cardNumber}</li>
+                <li>Expiry: {expiryMonth}/{expiryYear}</li>
+                <li>CVV: {cardSecurityCode}</li>
+            </ul>
         </div>
     )
 }
@@ -76,7 +81,7 @@ const App = ({onInitiate, error, result, paymentMethods, details, onChange, onDe
             <AmountEditor details={details} onChange={onDetailChange} />
             <PaymentRequestor onInitiate={onInitiate}/>
             {error && <ErrorDisplay error={error} />}
-            {result && <ResultDisplay result={result} />}
+            {result && <ResultDisplay {...result} />}
         </div>
     )
 }
