@@ -1,10 +1,23 @@
 import React, { Component } from 'react';
 
-const PaymentMethodSelector = () => {
+const PaymentMethod = ({name, value, active, onChange}) => {
+    return (
+        <li>
+            <label>
+                {name}
+                <input type='checkbox' checked={active} onChange={onChange} />
+            </label>
+        </li>
+    )
+}
+
+const PaymentMethodSelector = ({methods, onChange}) => {
     return (
         <div>
             <h2>Select Payment Method:</h2>
-            <p>visa, mastercard, amex</p>
+            <ul>
+                {methods.map((method, idx) => <PaymentMethod key={idx} {...method} onChange={onChange.bind(null, idx)} />)}
+            </ul>
         </div>
     )
 }
@@ -32,14 +45,23 @@ const ErrorDisplay = ({error}) => {
     )
 }
 
-const App = ({onInitiate, error}) => {
+const ResultDisplay = ({result}) => {
+    return (
+        <div style={{border: '1px solid green', margin: '1em', padding: '1em'}}>
+            {JSON.stringify(result, null, 4)}
+        </div>
+    )
+}
+
+const App = ({onInitiate, error, result, paymentMethods, onChange}) => {
     return (
         <div>
             <h1>Web Payments Test</h1>
-            <PaymentMethodSelector />
+            <PaymentMethodSelector methods={paymentMethods} onChange={onChange} />
             <AmountEditor />
             <PaymentRequestor onInitiate={onInitiate}/>
             {error && <ErrorDisplay error={error} />}
+            {result && <ResultDisplay result={result} />}
         </div>
     )
 }
