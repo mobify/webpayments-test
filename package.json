@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "start:dev": "node server.js",
-    "start": "node express.js",
+    "start": "npm run build && node express.js",
     "lint": "eslint src"
   },
   "devDependencies": {
