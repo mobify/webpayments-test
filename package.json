@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Test app for Web Payments API",
   "scripts": {
-    "build": "webpack webpack.prod.js",
-    "start": "node server.js",
-    "run": "node express.js",
+    "build": "webpack --config webpack.prod.js",
+    "start:dev": "node server.js",
+    "start": "node express.js",
     "lint": "eslint src"
   },
   "devDependencies": {
