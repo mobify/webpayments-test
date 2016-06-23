@@ -7,7 +7,7 @@ let app = express();
 app.set('port', (process.env.PORT || 3000));
 
 app.get('/', (req, res) => {
-    res.sendFile('src/index.html', {root: __dirname})
+    res.sendFile('index.html', {root: __dirname})
 });
 
 app.get('/static/bundle.js', (req, res) => {
