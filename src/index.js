@@ -2,11 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { createStore, combineReducers } from 'redux'
+import { Provider } from 'react-redux'
 
 let error = null
 let result = null
 
-const paymentMethodsReducer = (state = [], action) => {
+const paymentMethods = (state = [], action) => {
     switch (action.type) {
         case 'ADD_METHOD':
             return [
@@ -14,7 +15,7 @@ const paymentMethodsReducer = (state = [], action) => {
                 {
                     name: action.name,
                     value: action.value,
-                    active: false
+                    active: state.length === 0
                 }
             ]
         case 'TOGGLE_METHOD':
@@ -32,9 +33,33 @@ const paymentMethodsReducer = (state = [], action) => {
     }
 }
 
+const initialDetails = [
+    {label: 'Description', value: 'Test Total', key: 'label'},
+    {label: 'Currency', value: 'CAD', key: 'currency'},
+    {label: 'Amount', value: '10.50', key: 'value'}
+]
+
+const details = (state = initialDetails, action) => {
+    switch (action.type) {
+        case 'SET_DETAIL_VALUE':
+            return state.map((detail, idx) => {
+                if (idx == action.index) {
+                    return {
+                        ...detail,
+                        value: action.value
+                    }
+                }
+                return detail
+            })
+        default:
+            return state
+    }
+}
+
 let store = createStore(
     combineReducers({
-        paymentMethods: paymentMethodsReducer
+        paymentMethods,
+        details
     })
 )
 
@@ -57,18 +82,6 @@ store.dispatch({
 })
 
 
-let detailItems = [
-    {label: 'Description', value: 'Test Total', key: 'label'},
-    {label: 'Currency', value: 'CAD', key: 'currency'},
-    {label: 'Amount', value: '10.50', key: 'value'}
-]
-
-const onDetailChange = (idx, {target}) => {
-    detailItems[idx].value = target.value
-    render()
-}
-
-
 const onInitiate = () => {
     result = null
     if (!('PaymentRequest' in window)) {
@@ -85,7 +98,7 @@ const onInitiate = () => {
         }, [])
     }]
 
-    const detailDigest = detailItems.reduce((digest, {key, value}) => {
+    const detailDigest = store.getState().details.reduce((digest, {key, value}) => {
         digest[key] = value
         return digest
     }, {})
@@ -112,6 +125,9 @@ const onInitiate = () => {
 }
 
 let render = () => {
-    ReactDOM.render(<App store={store} onInitiate={onInitiate} error={error} result={result} details={detailItems} onDetailChange={onDetailChange} />, document.getElementById('root'));
+    ReactDOM.render(
+            <Provider store={store}>
+            <App onInitiate={onInitiate} error={error} result={result} />
+            </Provider>, document.getElementById('root'));
 }
 render()

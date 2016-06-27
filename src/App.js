@@ -1,40 +1,20 @@
-import React, { Component } from 'react';
-
-const PaymentMethod = ({name, value, active, onChange}) => {
-    return (
-        <li>
-            <label>
-                {name}
-                <input type='checkbox' checked={active} onChange={onChange} />
-            </label>
-        </li>
-    )
-}
-
-const PaymentMethodSelector = ({methods, dispatch}) => {
-    return (
-        <div>
-            <h2>Select Payment Method:</h2>
-            <ul>
-                {methods.map((method, idx) => <PaymentMethod key={idx} {...method} onChange={() => {dispatch({type: 'TOGGLE_METHOD', index: idx})}} />)}
-            </ul>
-        </div>
-    )
-}
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import PaymentMethodSelector from './PaymentMethodSelector'
 
 const AmountEditorItem = ({label, value, onChange}) => {
     return (
         <li>
             <label>
                 {label}
-                <input type='text' onChange={onChange} value={value} style={{'margin-left': "0.5em"}}/>
+                <input type='text' onChange={onChange} value={value} style={{marginLeft: '0.5em'}}/>
             </label>
         </li>
     )
 }
 
 
-const AmountEditor = ({details, onChange}) => {
+let AmountEditor = ({details, onChange}) => {
     return (
         <div>
             <h2>Specify amount:</h2>
@@ -45,6 +25,26 @@ const AmountEditor = ({details, onChange}) => {
         </div>
     )
 }
+
+AmountEditor = connect(
+    ({details}) => {
+        return {
+            details
+        }
+    },
+    (dispatch) => {
+        return {
+            onChange: (idx, {target}) => {
+                dispatch({
+                    type: 'SET_DETAIL_VALUE',
+                    index: idx,
+                    value: target.value
+                })
+            }
+        }
+    }
+)(AmountEditor)
+
 
 const PaymentRequestor = ({onInitiate}) => {
     return (
@@ -73,14 +73,12 @@ const ResultDisplay = ({cardholderName, cardNumber, expiryMonth, expiryYear, car
     )
 }
 
-const App = ({store, onInitiate, error, result, details, onChange, onDetailChange}) => {
-    let { paymentMethods } = store.getState()
-
+const App = ({onInitiate, error, result}) => {
     return (
         <div>
             <h1>Web Payments Test</h1>
-            <PaymentMethodSelector dispatch={store.dispatch} methods={paymentMethods} />
-            <AmountEditor details={details} onChange={onDetailChange} />
+            <PaymentMethodSelector />
+            <AmountEditor />
             <PaymentRequestor onInitiate={onInitiate}/>
             {error && <ErrorDisplay error={error} />}
             {result && <ResultDisplay {...result} />}
