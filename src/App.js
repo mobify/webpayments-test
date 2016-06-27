@@ -11,12 +11,12 @@ const PaymentMethod = ({name, value, active, onChange}) => {
     )
 }
 
-const PaymentMethodSelector = ({methods, onChange}) => {
+const PaymentMethodSelector = ({methods, dispatch}) => {
     return (
         <div>
             <h2>Select Payment Method:</h2>
             <ul>
-                {methods.map((method, idx) => <PaymentMethod key={idx} {...method} onChange={onChange.bind(null, idx)} />)}
+                {methods.map((method, idx) => <PaymentMethod key={idx} {...method} onChange={() => {dispatch({type: 'TOGGLE_METHOD', index: idx})}} />)}
             </ul>
         </div>
     )
@@ -73,11 +73,13 @@ const ResultDisplay = ({cardholderName, cardNumber, expiryMonth, expiryYear, car
     )
 }
 
-const App = ({onInitiate, error, result, paymentMethods, details, onChange, onDetailChange}) => {
+const App = ({store, onInitiate, error, result, details, onChange, onDetailChange}) => {
+    let { paymentMethods } = store.getState()
+
     return (
         <div>
             <h1>Web Payments Test</h1>
-            <PaymentMethodSelector methods={paymentMethods} onChange={onChange} />
+            <PaymentMethodSelector dispatch={store.dispatch} methods={paymentMethods} />
             <AmountEditor details={details} onChange={onDetailChange} />
             <PaymentRequestor onInitiate={onInitiate}/>
             {error && <ErrorDisplay error={error} />}
