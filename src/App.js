@@ -46,6 +46,35 @@ AmountEditor = connect(
 )(AmountEditor)
 
 
+let ShippingOptions = ({free, onChange}) => {
+    return (
+        <div>
+            <h2>Shipping Options</h2>
+            <label>
+                Free Shipping
+                <input type='checkbox' checked={free} onChange={() => onChange('free')} />
+            </label>
+        </div>
+    )
+}
+
+ShippingOptions = connect(
+    ({shipping}) => {
+        return {...shipping}
+    },
+    (dispatch) => {
+        return {
+            onChange: (flag) => {
+                dispatch({
+                    type: "FLIP_SHIPPING_FLAG",
+                    flag
+                })
+            }
+        }
+    }
+)(ShippingOptions)
+
+
 const PaymentRequestor = ({onInitiate}) => {
     return (
         <button onClick={onInitiate}>Initiate Request</button>
@@ -70,28 +99,49 @@ ErrorDisplay = connect(({error}) => {
     }
 })(ErrorDisplay)
 
+let DetailsDisplay = ({cardholderName, cardNumber, expiryMonth, expiryYear, cardSecurityCode}) => {
+    return (
+        <ul>
+            <li>Cardholder Name: {cardholderName}</li>
+            <li>Card Number: {cardNumber}</li>
+            <li>Expiry: {expiryMonth}/{expiryYear}</li>
+            <li>CVV: {cardSecurityCode}</li>
+        </ul>
+    )
+}
 
-let ResultDisplay = ({result}) => {
-    if (result === null) {
+const AddressDisplay = ({recipient, addressLine, city, region, country, postalCode}) => {
+    return (
+        <ul>
+            <li>Shipping Recipient: {recipient}</li>
+            <li>Address: {addressLine.join(' ')}</li>
+            <li>City: {city}</li>
+            <li>Region: {region}</li>
+            <li>Postal Code: {postalCode}</li>
+            <li>Country: {country}</li>
+        </ul>
+    )
+}
+
+
+let ResultDisplay = ({details, address}) => {
+    if (!details && !address) {
         return null
     }
-    let {cardholderName, cardNumber, expiryMonth, expiryYear, cardSecurityCode} = result
     return (
         <div style={{border: '1px solid green', margin: '1em', padding: '1em'}}>
-            <ul>
-                <li>Cardholder Name: {cardholderName}</li>
-                <li>Card Number: {cardNumber}</li>
-                <li>Expiry: {expiryMonth}/{expiryYear}</li>
-                <li>CVV: {cardSecurityCode}</li>
-            </ul>
+            <DetailsDisplay {...details} />
+            <hr />
+            {address && <AddressDisplay {...address} />}
         </div>
     )
 }
 
 ResultDisplay = connect(
-    ({result}) => {
+    ({result: {details, address}}) => {
         return {
-            result
+            details,
+            address
         }
     }
 )(ResultDisplay)
@@ -102,6 +152,7 @@ const App = ({onInitiate}) => {
             <h1>Web Payments Test</h1>
             <PaymentMethodSelector />
             <AmountEditor />
+            <ShippingOptions />
             <PaymentRequestor onInitiate={onInitiate}/>
             <ErrorDisplay />
             <ResultDisplay />

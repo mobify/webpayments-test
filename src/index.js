@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import { createStore, combineReducers } from 'redux'
 import { Provider } from 'react-redux'
+import _ from 'underscore'
 
 const paymentMethods = (state = [], action) => {
     switch (action.type) {
@@ -64,12 +65,26 @@ const error = (state = null, action) => {
     }
 }
 
-const result = (state = null, action) => {
+const result = (state = {}, action) => {
     switch (action.type) {
         case 'SET_RESULT':
-            return action.details
+            return {
+                details: action.details,
+                address: action.address
+            }
         case 'SET_ERROR':
-            return null
+            return {}
+        default:
+            return state
+    }
+}
+
+const shipping = (state = {free: false}, action) => {
+    switch (action.type) {
+        case 'FLIP_SHIPPING_FLAG':
+            let result = {...state}
+            result[action.flag] = !result[action.flag]
+            return result
         default:
             return state
     }
@@ -80,7 +95,8 @@ let store = createStore(
         paymentMethods,
         details,
         error,
-        result
+        result,
+        shipping
     })
 )
 
@@ -111,25 +127,43 @@ const onInitiate = () => {
         })
         return
     }
-    let supportedInstruments = [{
-        supportedMethods: store.getState().paymentMethods.reduce((arr, method) => {
-            if (method.active) {
-                arr.push(method.value)
-            }
-            return arr
-        }, [])
-    }]
 
-    const detailDigest = store.getState().details.reduce((digest, {key, value}) => {
-        digest[key] = value
-        return digest
-    }, {})
+    let { paymentMethods, details, shipping } = store.getState()
 
-    let details = {
-        total: {label: detailDigest.label, amount: {currency: detailDigest.currency, value: detailDigest.value}}
+    if (!_.some(paymentMethods, (method) => method.active)) {
+        store.dispatch({
+            type: 'SET_ERROR',
+            error: 'Must provide at least one payment method'
+        })
     }
 
-    let request = new PaymentRequest(supportedInstruments, details)
+    let supportedInstruments = [{
+        supportedMethods: _.pluck(
+            paymentMethods.filter((method) => method.active),
+            'value'
+        )
+    }]
+
+    const detailDigest = _.object(
+        details.map(({key, value}) => [key, value])
+    )
+
+    let details2 = {
+        total: {label: detailDigest.label, amount: {currency: detailDigest.currency, value: detailDigest.value}}
+    }
+    if (shipping.free) {
+        details2.shippingOptions = [{
+            id: 'freeShipping',
+            label: 'Free Shipping',
+            amount: {currency: detailDigest.currency, value: '0.00'},
+            selected: true
+        }]
+    }
+
+    const options = {requestShipping: _.some(shipping)}
+
+    let request = new PaymentRequest(supportedInstruments, details2, options)
+
 
     request.show().then((response) => {
         response.complete()
@@ -137,7 +171,15 @@ const onInitiate = () => {
                 console.log(response)
                 store.dispatch({
                     type: 'SET_RESULT',
-                    details: response.details
+                    details: response.details,
+                    address: {
+                        recipient: response.shippingAddress.recipient,
+                        addressLine: response.shippingAddress.addressLine,
+                        city: response.shippingAddress.city,
+                        region: response.shippingAddress.region,
+                        postalCode: response.shippingAddress.postalCode,
+                        country: response.shippingAddress.country
+                    }
                 })
             })
     }).catch((newError) => {
