@@ -4,9 +4,6 @@ import App from './App';
 import { createStore, combineReducers } from 'redux'
 import { Provider } from 'react-redux'
 
-let error = null
-let result = null
-
 const paymentMethods = (state = [], action) => {
     switch (action.type) {
         case 'ADD_METHOD':
@@ -56,10 +53,34 @@ const details = (state = initialDetails, action) => {
     }
 }
 
+const error = (state = null, action) => {
+    switch (action.type) {
+        case 'SET_ERROR':
+            return action.error
+        case 'SET_RESULT':
+            return null
+        default:
+            return state
+    }
+}
+
+const result = (state = null, action) => {
+    switch (action.type) {
+        case 'SET_RESULT':
+            return action.details
+        case 'SET_ERROR':
+            return null
+        default:
+            return state
+    }
+}
+
 let store = createStore(
     combineReducers({
         paymentMethods,
-        details
+        details,
+        error,
+        result
     })
 )
 
@@ -83,10 +104,11 @@ store.dispatch({
 
 
 const onInitiate = () => {
-    result = null
     if (!('PaymentRequest' in window)) {
-        error = 'Payment Request not supported, must have Chrome Dev with chrome://flags/#enable-experimental-web-platform-features enabled'
-        render()
+        store.dispatch({
+            type: 'SET_ERROR',
+            error: 'Payment Request not supported, must have Chrome Dev with chrome://flags/#enable-experimental-web-platform-features enabled'
+        })
         return
     }
     let supportedInstruments = [{
@@ -113,21 +135,22 @@ const onInitiate = () => {
         response.complete()
             .then(() => {
                 console.log(response)
-                result = response.details
-                error = null
-                render()
+                store.dispatch({
+                    type: 'SET_RESULT',
+                    details: response.details
+                })
             })
     }).catch((newError) => {
         console.log(newError.message)
-        error = newError.message
-        render()
+        store.dispatch({
+            type: 'SET_ERROR',
+            error: newError.message
+        })
     })
 }
 
-let render = () => {
-    ReactDOM.render(
-            <Provider store={store}>
-            <App onInitiate={onInitiate} error={error} result={result} />
-            </Provider>, document.getElementById('root'));
-}
-render()
+ReactDOM.render(
+        <Provider store={store}>
+        <App onInitiate={onInitiate} />
+        </Provider>, document.getElementById('root')
+);

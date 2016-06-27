@@ -52,7 +52,11 @@ const PaymentRequestor = ({onInitiate}) => {
     )
 }
 
-const ErrorDisplay = ({error}) => {
+let ErrorDisplay = ({error}) => {
+    if (error === null) {
+        return null
+    }
+
     return (
         <div style={{border: '1px solid red', color: 'red', margin: '1em', padding: '1em'}}>
             {error}
@@ -60,7 +64,18 @@ const ErrorDisplay = ({error}) => {
     )
 }
 
-const ResultDisplay = ({cardholderName, cardNumber, expiryMonth, expiryYear, cardSecurityCode}) => {
+ErrorDisplay = connect(({error}) => {
+    return {
+        error
+    }
+})(ErrorDisplay)
+
+
+let ResultDisplay = ({result}) => {
+    if (result === null) {
+        return null
+    }
+    let {cardholderName, cardNumber, expiryMonth, expiryYear, cardSecurityCode} = result
     return (
         <div style={{border: '1px solid green', margin: '1em', padding: '1em'}}>
             <ul>
@@ -73,15 +88,23 @@ const ResultDisplay = ({cardholderName, cardNumber, expiryMonth, expiryYear, car
     )
 }
 
-const App = ({onInitiate, error, result}) => {
+ResultDisplay = connect(
+    ({result}) => {
+        return {
+            result
+        }
+    }
+)(ResultDisplay)
+
+const App = ({onInitiate}) => {
     return (
         <div>
             <h1>Web Payments Test</h1>
             <PaymentMethodSelector />
             <AmountEditor />
             <PaymentRequestor onInitiate={onInitiate}/>
-            {error && <ErrorDisplay error={error} />}
-            {result && <ResultDisplay {...result} />}
+            <ErrorDisplay />
+            <ResultDisplay />
         </div>
     )
 }
