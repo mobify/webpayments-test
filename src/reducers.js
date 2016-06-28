@@ -66,7 +66,9 @@ const result = (state = {}, action) => {
         case 'SET_RESULT':
             return {
                 details: action.details,
-                address: action.address
+                address: action.address,
+                email: action.email,
+                phone: action.phone
             }
         case 'SET_ERROR':
             return {}
@@ -86,10 +88,22 @@ const shipping = (state = {free: false, paid: false}, action) => {
     }
 }
 
+const misc = (state = {email: false, phone: false}, action) => {
+    switch(action.type) {
+        case 'FLIP_MISC_FLAG':
+            let result = {...state}
+            result[action.flag] = !result[action.flag]
+            return result
+        default:
+            return state
+    }
+}
+
 export default combineReducers({
     paymentMethods,
     details,
     error,
     result,
-    shipping
+    shipping,
+    misc
 })

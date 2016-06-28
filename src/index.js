@@ -94,13 +94,13 @@ const processShipping = ({free, paid}, currency) => {
     return shippingOptions
 }
 
-const transformState = (next) => ({ paymentMethods, details, shipping }) => {
+const transformState = (next) => ({ paymentMethods, details, shipping, misc }) => {
     const supportedInstruments = processMethods(paymentMethods)
     const total = processDetails(details)
     const shippingOptions = processShipping(shipping, total.amount.currency)
 
     if (supportedInstruments) {
-        return next({ supportedInstruments, total, shippingOptions})
+        return next({ supportedInstruments, total, shippingOptions, misc})
     }
 
     store.dispatch({
@@ -109,13 +109,17 @@ const transformState = (next) => ({ paymentMethods, details, shipping }) => {
     })
 }
 
-const makeRequest = (next) => ({ supportedInstruments, total, shippingOptions }) => {
+const makeRequest = (next) => ({ supportedInstruments, total, shippingOptions, misc }) => {
     let details = {
         total,
         shippingOptions
     }
 
-    const options = {requestShipping: shippingOptions.length > 0}
+    const options = {
+        requestShipping: shippingOptions.length > 0,
+        requestPayerPhone: misc.phone,
+        requestPayerEmail: misc.email
+    }
 
     let request = new PaymentRequest(supportedInstruments, details, options)
 
@@ -144,7 +148,9 @@ const processResponse = (response) => {
                     region: response.shippingAddress.region,
                     postalCode: response.shippingAddress.postalCode,
                     country: response.shippingAddress.country
-                }
+                },
+                email: response.payerEmail,
+                phone: response.payerPhone
             })
         })
 }

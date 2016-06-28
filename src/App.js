@@ -84,6 +84,42 @@ ShippingOptions = connect(
     }
 )(ShippingOptions)
 
+const MiscOptions = connect(
+    ({misc}) => {
+        return {
+            ...misc
+        }
+    },
+    (dispatch) => {
+        return {
+            onChange: (flag) => {
+                dispatch({
+                    type: 'FLIP_MISC_FLAG',
+                    flag
+                })
+            }
+        }
+    }
+)(({email, phone, onChange}) => {
+    return (
+        <div>
+            <ul>
+                <li>
+                    <label>
+                        Prompt for email
+                        <input type='checkbox' checked={email} onChange={() => onChange('email')} />
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        Prompt for phone number
+                        <input type='checkbox' checked={phone} onChange={() => onChange('phone')} />
+                    </label>
+                </li>
+            </ul>
+        </div>
+    )
+})
 
 const PaymentRequestor = ({onInitiate}) => {
     return (
@@ -134,7 +170,7 @@ const AddressDisplay = ({recipient, addressLine, city, region, country, postalCo
 }
 
 
-let ResultDisplay = ({details, address}) => {
+let ResultDisplay = ({details, address, email, phone}) => {
     if (!details && !address) {
         return null
     }
@@ -143,15 +179,17 @@ let ResultDisplay = ({details, address}) => {
             <DetailsDisplay {...details} />
             <hr />
             {address && <AddressDisplay {...address} />}
+            <hr />
+            {email && <p>User Email: {email}</p>}
+            {phone && <p>User Phone: {phone}</p>}
         </div>
     )
 }
 
 ResultDisplay = connect(
-    ({result: {details, address}}) => {
+    ({result}) => {
         return {
-            details,
-            address
+            ...result
         }
     }
 )(ResultDisplay)
@@ -163,6 +201,8 @@ const App = ({onInitiate}) => {
             <PaymentMethodSelector />
             <AmountEditor />
             <ShippingOptions />
+            <hr />
+            <MiscOptions />
             <PaymentRequestor onInitiate={onInitiate}/>
             <ErrorDisplay />
             <ResultDisplay />
