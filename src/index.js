@@ -54,6 +54,7 @@ const processMethods = (paymentMethods) => {
                    data: options
                }
           })
+          .toArray()
 
     if (supportedInstruments.length === 0) {
         return null
@@ -63,7 +64,7 @@ const processMethods = (paymentMethods) => {
 
 const processDetails = (details) => {
     const detailDigest = _.object(
-        details.map(({key, value}) => [key, value])
+        details.map(({key, value}) => [key, value]).toArray()
     )
     return {
         label: detailDigest.label,

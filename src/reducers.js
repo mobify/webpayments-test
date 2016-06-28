@@ -1,50 +1,42 @@
 import { combineReducers } from 'redux'
+import { List } from 'immutable'
 
-const paymentMethods = (state = [], action) => {
+const paymentMethods = (state = List(), action) => {
     switch (action.type) {
         case 'ADD_METHOD':
-            return [
-                ...state,
-                {
-                    name: action.name,
-                    value: action.value,
-                    options: {...action.options},
-                    active: state.length === 0
-                }
-            ]
-        case 'TOGGLE_METHOD':
-            return state.map((method, idx) => {
-                if (idx == action.index) {
-                    return {
-                        ...method,
-                        active: !method.active
-                    }
-                }
-                return method
+            return state.push({
+                name: action.name,
+                value: action.value,
+                options: {...action.options},
+                active: state.size === 0
             })
+        case 'TOGGLE_METHOD':
+            return state.update(
+                action.index,
+                (method) => {
+                    return {...method, active: !method.active}
+                }
+            )
         default:
             return state
     }
 }
 
-const initialDetails = [
+const initialDetails = List([
     {label: 'Description', value: 'Test Total', key: 'label'},
     {label: 'Currency', value: 'CAD', key: 'currency'},
     {label: 'Amount', value: '10.50', key: 'value'}
-]
+])
 
 const details = (state = initialDetails, action) => {
     switch (action.type) {
         case 'SET_DETAIL_VALUE':
-            return state.map((detail, idx) => {
-                if (idx == action.index) {
-                    return {
-                        ...detail,
-                        value: action.value
-                    }
+            return state.update(
+                action.index,
+                (detail) => {
+                    return {...detail, value: action.value}
                 }
-                return detail
-            })
+            )
         default:
             return state
     }
