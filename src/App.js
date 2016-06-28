@@ -46,14 +46,24 @@ AmountEditor = connect(
 )(AmountEditor)
 
 
-let ShippingOptions = ({free, onChange}) => {
+let ShippingOptions = ({free, paid, onChange}) => {
     return (
         <div>
             <h2>Shipping Options</h2>
-            <label>
-                Free Shipping
-                <input type='checkbox' checked={free} onChange={() => onChange('free')} />
-            </label>
+            <ul>
+                <li>
+                    <label>
+                        Free Shipping
+                        <input type='checkbox' checked={free} onChange={() => onChange('free')} />
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        Paid Shipping ($5.00)
+                        <input type='checkbox' checked={paid} onChange={() => onChange('paid')} />
+                    </label>
+                </li>
+            </ul>
         </div>
     )
 }

@@ -79,7 +79,7 @@ const result = (state = {}, action) => {
     }
 }
 
-const shipping = (state = {free: false}, action) => {
+const shipping = (state = {free: false, paid: false}, action) => {
     switch (action.type) {
         case 'FLIP_SHIPPING_FLAG':
             let result = {...state}
@@ -118,78 +118,126 @@ store.dispatch({
     value: 'amex'
 })
 
-
-const onInitiate = () => {
-    if (!('PaymentRequest' in window)) {
-        store.dispatch({
-            type: 'SET_ERROR',
-            error: 'Payment Request not supported, must have Chrome Dev with chrome://flags/#enable-experimental-web-platform-features enabled'
-        })
-        return
+const featureDetect = (next) => () => {
+    if ('PaymentRequest' in window) {
+        return next()
     }
+    store.dispatch({
+        type: 'SET_ERROR',
+        error: 'Payment Request not supported, must have Chrome Dev with chrome://flags/#enable-experimental-web-platform-features enabled'
+    })
+}
 
-    let { paymentMethods, details, shipping } = store.getState()
+const connectState = (next) => () => { next(store.getState()) }
 
-    if (!_.some(paymentMethods, (method) => method.active)) {
-        store.dispatch({
-            type: 'SET_ERROR',
-            error: 'Must provide at least one payment method'
-        })
-    }
-
-    let supportedInstruments = [{
+const processMethods = (paymentMethods) => {
+    const supportedInstruments = [{
         supportedMethods: _.pluck(
             paymentMethods.filter((method) => method.active),
             'value'
         )
     }]
+    if (supportedInstruments[0].supportedMethods.length === 0) {
+        return null
+    }
+    return supportedInstruments
+}
 
+const processDetails = (details) => {
     const detailDigest = _.object(
         details.map(({key, value}) => [key, value])
     )
-
-    let details2 = {
-        total: {label: detailDigest.label, amount: {currency: detailDigest.currency, value: detailDigest.value}}
+    return {
+        label: detailDigest.label,
+        amount: {currency: detailDigest.currency, value: detailDigest.value}
     }
-    if (shipping.free) {
-        details2.shippingOptions = [{
+}
+
+const processShipping = ({free, paid}, currency) => {
+    let shippingOptions = []
+
+    if (free) {
+        shippingOptions.push({
             id: 'freeShipping',
             label: 'Free Shipping',
-            amount: {currency: detailDigest.currency, value: '0.00'},
-            selected: true
-        }]
+            amount: {currency: currency, value: '0.00'}
+        })
+    }
+    if (paid) {
+        shippingOptions.push({
+            id: 'paidShipping',
+            label: 'Premium Shipping',
+            amount: {currency: currency, value: '5.00'}
+        })
+    }
+    if (shippingOptions.length > 0) {
+        shippingOptions[0].selected = true
+    }
+    return shippingOptions
+}
+
+const transformState = (next) => ({ paymentMethods, details, shipping }) => {
+    const supportedInstruments = processMethods(paymentMethods)
+    const total = processDetails(details)
+    const shippingOptions = processShipping(shipping, total.amount.currency)
+
+    if (supportedInstruments) {
+        return next({ supportedInstruments, total, shippingOptions})
     }
 
-    const options = {requestShipping: _.some(shipping)}
-
-    let request = new PaymentRequest(supportedInstruments, details2, options)
-
-
-    request.show().then((response) => {
-        response.complete()
-            .then(() => {
-                console.log(response)
-                store.dispatch({
-                    type: 'SET_RESULT',
-                    details: response.details,
-                    address: {
-                        recipient: response.shippingAddress.recipient,
-                        addressLine: response.shippingAddress.addressLine,
-                        city: response.shippingAddress.city,
-                        region: response.shippingAddress.region,
-                        postalCode: response.shippingAddress.postalCode,
-                        country: response.shippingAddress.country
-                    }
-                })
-            })
-    }).catch((newError) => {
-        console.log(newError.message)
-        store.dispatch({
-            type: 'SET_ERROR',
-            error: newError.message
-        })
+    store.dispatch({
+        type: 'SET_ERROR',
+        error: 'Must provide at least one payment method'
     })
 }
+
+const makeRequest = (next) => ({ supportedInstruments, total, shippingOptions }) => {
+    let details = {
+        total,
+        shippingOptions
+    }
+
+    const options = {requestShipping: shippingOptions.length > 0}
+
+    let request = new PaymentRequest(supportedInstruments, details, options)
+
+    request.show()
+        .then(next)
+        .catch((newError) => {
+            console.log(newError.message)
+            store.dispatch({
+                type: 'SET_ERROR',
+                error: newError.message
+            })
+        })
+}
+
+const processResponse = (response) => {
+    response.complete()
+        .then(() => {
+            console.log(response)
+            store.dispatch({
+                type: 'SET_RESULT',
+                details: response.details,
+                address: response.shippingAddress && {
+                    recipient: response.shippingAddress.recipient,
+                    addressLine: response.shippingAddress.addressLine,
+                    city: response.shippingAddress.city,
+                    region: response.shippingAddress.region,
+                    postalCode: response.shippingAddress.postalCode,
+                    country: response.shippingAddress.country
+                }
+            })
+        })
+}
+
+const onInitiate = _.compose(
+    featureDetect,
+    connectState,
+    transformState,
+    makeRequest,
+    processResponse
+)
 
 ReactDOM.render(
         <Provider store={store}>
