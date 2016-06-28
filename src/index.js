@@ -1,104 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
-import { createStore, combineReducers } from 'redux'
+import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 import _ from 'underscore'
 
-const paymentMethods = (state = [], action) => {
-    switch (action.type) {
-        case 'ADD_METHOD':
-            return [
-                ...state,
-                {
-                    name: action.name,
-                    value: action.value,
-                    active: state.length === 0
-                }
-            ]
-        case 'TOGGLE_METHOD':
-            return state.map((method, idx) => {
-                if (idx == action.index) {
-                    return {
-                        ...method,
-                        active: !method.active
-                    }
-                }
-                return method
-            })
-        default:
-            return state
-    }
-}
+import App from './App'
+import reducer from './reducers'
 
-const initialDetails = [
-    {label: 'Description', value: 'Test Total', key: 'label'},
-    {label: 'Currency', value: 'CAD', key: 'currency'},
-    {label: 'Amount', value: '10.50', key: 'value'}
-]
-
-const details = (state = initialDetails, action) => {
-    switch (action.type) {
-        case 'SET_DETAIL_VALUE':
-            return state.map((detail, idx) => {
-                if (idx == action.index) {
-                    return {
-                        ...detail,
-                        value: action.value
-                    }
-                }
-                return detail
-            })
-        default:
-            return state
-    }
-}
-
-const error = (state = null, action) => {
-    switch (action.type) {
-        case 'SET_ERROR':
-            return action.error
-        case 'SET_RESULT':
-            return null
-        default:
-            return state
-    }
-}
-
-const result = (state = {}, action) => {
-    switch (action.type) {
-        case 'SET_RESULT':
-            return {
-                details: action.details,
-                address: action.address
-            }
-        case 'SET_ERROR':
-            return {}
-        default:
-            return state
-    }
-}
-
-const shipping = (state = {free: false, paid: false}, action) => {
-    switch (action.type) {
-        case 'FLIP_SHIPPING_FLAG':
-            let result = {...state}
-            result[action.flag] = !result[action.flag]
-            return result
-        default:
-            return state
-    }
-}
-
-let store = createStore(
-    combineReducers({
-        paymentMethods,
-        details,
-        error,
-        result,
-        shipping
-    })
-)
+let store = createStore(reducer, {}, window.devToolsExtension && window.devToolsExtension())
 
 store.dispatch({
     type: 'ADD_METHOD',
@@ -118,6 +27,12 @@ store.dispatch({
     value: 'amex'
 })
 
+// store.dispatch({
+//     type: 'ADD_METHOD',
+//     name: 'PayPal',
+//     vale: 'paypal'
+// })
+
 const featureDetect = (next) => () => {
     if ('PaymentRequest' in window) {
         return next()
@@ -131,13 +46,16 @@ const featureDetect = (next) => () => {
 const connectState = (next) => () => { next(store.getState()) }
 
 const processMethods = (paymentMethods) => {
-    const supportedInstruments = [{
-        supportedMethods: _.pluck(
-            paymentMethods.filter((method) => method.active),
-            'value'
-        )
-    }]
-    if (supportedInstruments[0].supportedMethods.length === 0) {
+    const supportedInstruments = paymentMethods
+          .filter((method) => method.active)
+          .map(({value, options}) => {
+               return {
+                   supportedMethods: [value],
+                   data: options
+               }
+          })
+
+    if (supportedInstruments.length === 0) {
         return null
     }
     return supportedInstruments
@@ -231,12 +149,14 @@ const processResponse = (response) => {
         })
 }
 
-const onInitiate = _.compose(
-    featureDetect,
-    connectState,
-    transformState,
-    makeRequest,
-    processResponse
+const onInitiate = featureDetect(
+    connectState(
+        transformState(
+            makeRequest(
+                processResponse
+            )
+        )
+    )
 )
 
 ReactDOM.render(
