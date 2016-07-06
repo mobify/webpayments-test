@@ -27,12 +27,11 @@ store.dispatch({
     value: 'amex'
 })
 
-// store.dispatch({
-//     type: 'ADD_METHOD',
-//     name: 'PayPal',
-//     vale: 'paypal'
-// })
+//********
+// The following sequence of functions implements the call to the Web
+// Payments API, based on the parameters in the Redux store.
 
+// Detect the presence of the PaymentRequest object
 const featureDetect = (next) => () => {
     if ('PaymentRequest' in window) {
         return next()
@@ -43,14 +42,20 @@ const featureDetect = (next) => () => {
     })
 }
 
+// Pass the Redux state to the remaining code as a function parameter.
 const connectState = (next) => () => { next(store.getState()) }
 
+// Convert the Redux state of the payment method options to
+// a valid supportedInstruments parameter.
 const processMethods = (paymentMethods) => {
     const supportedInstruments = paymentMethods
           .filter((method) => method.active)
           .map(({value, options}) => {
                return {
                    supportedMethods: [value],
+                   // Each payment method can have an options object
+                   // associated with it. Credit cards do not use this
+                   // but e.g. Android Pay would.
                    data: options
                }
           })
@@ -62,6 +67,7 @@ const processMethods = (paymentMethods) => {
     return supportedInstruments
 }
 
+// Converts the total in the Redux state to a value object.
 const processDetails = (details) => {
     const detailDigest = _.object(
         details.map(({key, value}) => [key, value]).toArray()

@@ -2,6 +2,10 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import PaymentMethodSelector from './PaymentMethodSelector'
 
+/**
+ * The UI components for the demo app.
+ */
+
 const AmountEditorItem = ({label, value, onChange}) => {
     return (
         <li>
