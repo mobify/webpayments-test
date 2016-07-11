@@ -1,0 +1,6 @@
+extends:
+  - './node_modules/mobify-code-style/es6/mobify-es6-react.yml'
+globals:
+  PaymentRequest: 'false'
+rules:
+  react/prop-types: 'off'

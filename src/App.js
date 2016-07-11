@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React from 'react'
+import {connect} from 'react-redux'
 import PaymentMethodSelector from './PaymentMethodSelector'
 
 /**
@@ -11,7 +11,12 @@ const AmountEditorItem = ({label, value, onChange}) => {
         <li>
             <label>
                 {label}
-                <input type='text' onChange={onChange} value={value} style={{marginLeft: '0.5em'}}/>
+                <input
+                    type="text"
+                    onChange={onChange}
+                    value={value}
+                    style={{marginLeft: '0.5em'}}
+                />
             </label>
         </li>
     )
@@ -24,8 +29,8 @@ let AmountEditor = ({details, onChange}) => {
             <h2>Specify amount:</h2>
             <ul>
                 {details.map((detail, idx) =>
-                <AmountEditorItem key={idx} {...detail} onChange={onChange.bind(null, idx)} />)}
-        </ul>
+                    <AmountEditorItem key={idx} {...detail} onChange={onChange.bind(null, idx)} />)}
+            </ul>
         </div>
     )
 }
@@ -58,13 +63,13 @@ let ShippingOptions = ({free, paid, onChange}) => {
                 <li>
                     <label>
                         Free Shipping
-                        <input type='checkbox' checked={free} onChange={() => onChange('free')} />
+                        <input type="checkbox" checked={free} onChange={() => onChange('free')} />
                     </label>
                 </li>
                 <li>
                     <label>
                         Paid Shipping ($5.00)
-                        <input type='checkbox' checked={paid} onChange={() => onChange('paid')} />
+                        <input type="checkbox" checked={paid} onChange={() => onChange('paid')} />
                     </label>
                 </li>
             </ul>
@@ -80,7 +85,7 @@ ShippingOptions = connect(
         return {
             onChange: (flag) => {
                 dispatch({
-                    type: "FLIP_SHIPPING_FLAG",
+                    type: 'FLIP_SHIPPING_FLAG',
                     flag
                 })
             }
@@ -111,13 +116,13 @@ const MiscOptions = connect(
                 <li>
                     <label>
                         Prompt for email
-                        <input type='checkbox' checked={email} onChange={() => onChange('email')} />
+                        <input type="checkbox" checked={email} onChange={() => onChange('email')} />
                     </label>
                 </li>
                 <li>
                     <label>
                         Prompt for phone number
-                        <input type='checkbox' checked={phone} onChange={() => onChange('phone')} />
+                        <input type="checkbox" checked={phone} onChange={() => onChange('phone')} />
                     </label>
                 </li>
             </ul>
@@ -207,7 +212,7 @@ const App = ({onInitiate}) => {
             <ShippingOptions />
             <hr />
             <MiscOptions />
-            <PaymentRequestor onInitiate={onInitiate}/>
+            <PaymentRequestor onInitiate={onInitiate} />
             <ErrorDisplay />
             <ResultDisplay />
         </div>

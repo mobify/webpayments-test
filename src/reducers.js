@@ -1,24 +1,24 @@
-import { combineReducers } from 'redux'
-import { List } from 'immutable'
+import {combineReducers} from 'redux'
+import {List} from 'immutable'
 
 const paymentMethods = (state = List(), action) => {
     switch (action.type) {
-        case 'ADD_METHOD':
-            return state.push({
-                name: action.name,
-                value: action.value,
-                options: {...action.options},
-                active: state.size === 0
-            })
-        case 'TOGGLE_METHOD':
-            return state.update(
+    case 'ADD_METHOD':
+        return state.push({
+            name: action.name,
+            value: action.value,
+            options: {...action.options},
+            active: state.size === 0
+        })
+    case 'TOGGLE_METHOD':
+        return state.update(
                 action.index,
                 (method) => {
                     return {...method, active: !method.active}
                 }
             )
-        default:
-            return state
+    default:
+        return state
     }
 }
 
@@ -30,66 +30,68 @@ const initialDetails = List([
 
 const details = (state = initialDetails, action) => {
     switch (action.type) {
-        case 'SET_DETAIL_VALUE':
-            return state.update(
+    case 'SET_DETAIL_VALUE':
+        return state.update(
                 action.index,
                 (detail) => {
                     return {...detail, value: action.value}
                 }
             )
-        default:
-            return state
+    default:
+        return state
     }
 }
 
 const error = (state = null, action) => {
     switch (action.type) {
-        case 'SET_ERROR':
-            return action.error
-        case 'SET_RESULT':
-            return null
-        default:
-            return state
+    case 'SET_ERROR':
+        return action.error
+    case 'SET_RESULT':
+        return null
+    default:
+        return state
     }
 }
 
 const result = (state = {}, action) => {
     switch (action.type) {
-        case 'SET_RESULT':
-            return {
-                details: action.details,
-                address: action.address,
-                email: action.email,
-                phone: action.phone
-            }
-        case 'SET_ERROR':
-            return {}
-        default:
-            return state
+    case 'SET_RESULT':
+        return {
+            details: action.details,
+            address: action.address,
+            email: action.email,
+            phone: action.phone
+        }
+    case 'SET_ERROR':
+        return {}
+    default:
+        return state
     }
 }
 
+/* eslint-disable no-case-declarations */
 const shipping = (state = {free: false, paid: false}, action) => {
     switch (action.type) {
-        case 'FLIP_SHIPPING_FLAG':
-            let result = {...state}
-            result[action.flag] = !result[action.flag]
-            return result
-        default:
-            return state
+    case 'FLIP_SHIPPING_FLAG':
+        const result = {...state}
+        result[action.flag] = !result[action.flag]
+        return result
+    default:
+        return state
     }
 }
 
 const misc = (state = {email: false, phone: false}, action) => {
-    switch(action.type) {
-        case 'FLIP_MISC_FLAG':
-            let result = {...state}
-            result[action.flag] = !result[action.flag]
-            return result
-        default:
-            return state
+    switch (action.type) {
+    case 'FLIP_MISC_FLAG':
+        const result = {...state}
+        result[action.flag] = !result[action.flag]
+        return result
+    default:
+        return state
     }
 }
+/* eslint-enable no-case-declarations */
 
 export default combineReducers({
     paymentMethods,

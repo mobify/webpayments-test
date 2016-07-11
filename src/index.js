@@ -1,7 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { createStore } from 'redux'
-import { Provider } from 'react-redux'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import {createStore} from 'redux'
+import {Provider} from 'react-redux'
 import _ from 'underscore'
 
 import App from './App'
@@ -27,18 +27,21 @@ store.dispatch({
     value: 'amex'
 })
 
-//********
+//* *******
 // The following sequence of functions implements the call to the Web
 // Payments API, based on the parameters in the Redux store.
 
 // Detect the presence of the PaymentRequest object
 const featureDetect = (next) => () => {
     if ('PaymentRequest' in window) {
-        return next()
+        next()
+        return
     }
     store.dispatch({
         type: 'SET_ERROR',
+        /* eslint-disable max-len */
         error: 'Payment Request not supported, must have Chrome Dev with chrome://flags/#enable-experimental-web-platform-features enabled'
+        /* eslint-enable max-len */
     })
 }
 
@@ -51,13 +54,13 @@ const processMethods = (paymentMethods) => {
     const supportedInstruments = paymentMethods
           .filter((method) => method.active)
           .map(({value, options}) => {
-               return {
-                   supportedMethods: [value],
+              return {
+                  supportedMethods: [value],
                    // Each payment method can have an options object
                    // associated with it. Credit cards do not use this
                    // but e.g. Android Pay would.
-                   data: options
-               }
+                  data: options
+              }
           })
           .toArray()
 
@@ -79,20 +82,20 @@ const processDetails = (details) => {
 }
 
 const processShipping = ({free, paid}, currency) => {
-    let shippingOptions = []
+    const shippingOptions = []
 
     if (free) {
         shippingOptions.push({
             id: 'freeShipping',
             label: 'Free Shipping',
-            amount: {currency: currency, value: '0.00'}
+            amount: {currency, value: '0.00'}
         })
     }
     if (paid) {
         shippingOptions.push({
             id: 'paidShipping',
             label: 'Premium Shipping',
-            amount: {currency: currency, value: '5.00'}
+            amount: {currency, value: '5.00'}
         })
     }
     if (shippingOptions.length > 0) {
@@ -101,13 +104,14 @@ const processShipping = ({free, paid}, currency) => {
     return shippingOptions
 }
 
-const transformState = (next) => ({ paymentMethods, details, shipping, misc }) => {
+const transformState = (next) => ({paymentMethods, details, shipping, misc}) => {
     const supportedInstruments = processMethods(paymentMethods)
     const total = processDetails(details)
     const shippingOptions = processShipping(shipping, total.amount.currency)
 
     if (supportedInstruments) {
-        return next({ supportedInstruments, total, shippingOptions, misc})
+        next({supportedInstruments, total, shippingOptions, misc})
+        return
     }
 
     store.dispatch({
@@ -116,8 +120,8 @@ const transformState = (next) => ({ paymentMethods, details, shipping, misc }) =
     })
 }
 
-const makeRequest = (next) => ({ supportedInstruments, total, shippingOptions, misc }) => {
-    let details = {
+const makeRequest = (next) => ({supportedInstruments, total, shippingOptions, misc}) => {
+    const details = {
         total,
         shippingOptions
     }
@@ -128,7 +132,7 @@ const makeRequest = (next) => ({ supportedInstruments, total, shippingOptions, m
         requestPayerEmail: misc.email
     }
 
-    let request = new PaymentRequest(supportedInstruments, details, options)
+    const request = new PaymentRequest(supportedInstruments, details, options)
 
     request.show()
         .then(next)
@@ -173,7 +177,7 @@ const onInitiate = featureDetect(
 )
 
 ReactDOM.render(
-        <Provider store={store}>
+    <Provider store={store}>
         <App onInitiate={onInitiate} />
-        </Provider>, document.getElementById('root')
-);
+    </Provider>, document.getElementById('root')
+)

@@ -6,16 +6,20 @@
     "build": "webpack --config webpack.prod.js",
     "start:dev": "node server.js",
     "start": "npm run build && node express.js",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "ava"
   },
   "devDependencies": {
-    "eslint": "^1.10.3",
+    "ava": "^0.15.2",
+    "eslint": "^3.0.1",
+    "eslint-import-resolver-webpack": "^0.3.2",
+    "eslint-plugin-import": "^1.10.2",
     "eslint-plugin-react": "^3.6.2",
+    "mobify-code-style": "^2.5.0",
     "webpack-dev-server": "^1.12.1"
   },
   "dependencies": {
     "babel-core": "^6.0.20",
-    "babel-eslint": "^4.1.3",
     "babel-loader": "^6.0.1",
     "babel-preset-es2015": "^6.0.15",
     "babel-preset-react": "^6.0.15",

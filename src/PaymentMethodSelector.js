@@ -1,12 +1,12 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 
-const PaymentMethod = ({name, value, active, onChange}) => {
+const PaymentMethod = ({name, active, onChange}) => {
     return (
         <li>
             <label>
                 {name}
-                <input type='checkbox' checked={active} onChange={onChange} />
+                <input type="checkbox" checked={active} onChange={onChange} />
             </label>
         </li>
     )
@@ -17,7 +17,8 @@ let PaymentMethodSelector = ({methods, onChange}) => {
         <div>
             <h2>Select Payment Method:</h2>
             <ul>
-                {methods.map((method, idx) => <PaymentMethod key={idx} {...method} onChange={() => {onChange(idx)}} />)}
+                {methods.map((method, idx) =>
+                    <PaymentMethod key={idx} {...method} onChange={() => { onChange(idx) }} />)}
             </ul>
         </div>
     )
