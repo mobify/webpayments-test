@@ -1,44 +1,40 @@
 import {combineReducers} from 'redux'
-import {List} from 'immutable'
+import {List, Map, fromJS} from 'immutable'
 
 export const paymentMethods = (state = List(), action) => {
     switch (action.type) {
-    case 'ADD_METHOD':
-        return state.push({
-            name: action.name,
-            value: action.value,
-            options: {...action.options},
-            active: state.size === 0
-        })
-    case 'TOGGLE_METHOD':
-        return state.update(
+        case 'ADD_METHOD':
+            return state.push(Map({
+                name: action.name,
+                value: action.value,
+                options: Map(action.options),
+                active: state.size === 0
+            }))
+        case 'TOGGLE_METHOD':
+            return state.update(
                 action.index,
-                (method) => {
-                    return {...method, active: !method.active}
-                }
+                (method) => method.update('active', value => !value)
             )
-    default:
-        return state
+        default:
+            return state
     }
 }
 
-const initialDetails = List([
-    {label: 'Description', value: 'Test Total', key: 'label'},
-    {label: 'Currency', value: 'CAD', key: 'currency'},
-    {label: 'Amount', value: '10.50', key: 'value'}
-])
+const initialDetails = List.of(
+    Map({label: 'Description', value: 'Test Total', key: 'label'}),
+    Map({label: 'Currency', value: 'CAD', key: 'currency'}),
+    Map({label: 'Amount', value: '10.50', key: 'value'})
+)
 
 export const details = (state = initialDetails, action) => {
     switch (action.type) {
-    case 'SET_DETAIL_VALUE':
-        return state.update(
+        case 'SET_DETAIL_VALUE':
+            return state.update(
                 action.index,
-                (detail) => {
-                    return {...detail, value: action.value}
-                }
+                (detail) => detail.set('value', action.value)
             )
-    default:
-        return state
+        default:
+            return state
     }
 }
 
@@ -70,25 +66,27 @@ export const result = (state = {}, action) => {
 }
 
 /* eslint-disable no-case-declarations */
-export const shipping = (state = {free: false, paid: false}, action) => {
+export const shipping = (state = Map({free: false, paid: false}), action) => {
     switch (action.type) {
-    case 'FLIP_SHIPPING_FLAG':
-        const result = {...state}
-        result[action.flag] = !result[action.flag]
-        return result
-    default:
-        return state
+        case 'FLIP_SHIPPING_FLAG':
+            return state.update(
+                action.flag,
+                flag => !flag
+            )
+        default:
+            return state
     }
 }
 
-export const misc = (state = {email: false, phone: false}, action) => {
+export const misc = (state = Map({email: false, phone: false}), action) => {
     switch (action.type) {
-    case 'FLIP_MISC_FLAG':
-        const result = {...state}
-        result[action.flag] = !result[action.flag]
-        return result
-    default:
-        return state
+        case 'FLIP_MISC_FLAG':
+            return state.update(
+                action.flag,
+                flag => !flag
+            )
+        default:
+            return state
     }
 }
 /* eslint-enable no-case-declarations */

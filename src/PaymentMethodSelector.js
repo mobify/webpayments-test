@@ -26,7 +26,7 @@ let PaymentMethodSelector = ({methods, onChange}) => {
 
 const mapStateToProps = (state) => {
     return {
-        methods: state.paymentMethods
+        methods: state.paymentMethods.toJS()
     }
 }
 

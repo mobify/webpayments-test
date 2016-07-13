@@ -38,7 +38,7 @@ let AmountEditor = ({details, onChange}) => {
 AmountEditor = connect(
     ({details}) => {
         return {
-            details
+            details: details.toJS()
         }
     },
     (dispatch) => {
@@ -79,7 +79,7 @@ let ShippingOptions = ({free, paid, onChange}) => {
 
 ShippingOptions = connect(
     ({shipping}) => {
-        return {...shipping}
+        return shipping.toJS()
     },
     (dispatch) => {
         return {
@@ -95,9 +95,7 @@ ShippingOptions = connect(
 
 const MiscOptions = connect(
     ({misc}) => {
-        return {
-            ...misc
-        }
+        return misc.toJS()
     },
     (dispatch) => {
         return {
