@@ -9,13 +9,21 @@
     "lint": "eslint src",
     "test": "ava"
   },
+  "ava": {
+    "babel": "inherit",
+    "require": [
+      "babel-register"
+    ]
+  },
   "devDependencies": {
     "ava": "^0.15.2",
+    "babel-register": "^6.9.0",
     "eslint": "^3.0.1",
     "eslint-import-resolver-webpack": "^0.3.2",
     "eslint-plugin-import": "^1.10.2",
     "eslint-plugin-react": "^3.6.2",
     "mobify-code-style": "^2.5.0",
+    "redux-ava": "^2.0.0",
     "webpack-dev-server": "^1.12.1"
   },
   "dependencies": {

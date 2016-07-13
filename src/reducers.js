@@ -1,7 +1,7 @@
 import {combineReducers} from 'redux'
 import {List} from 'immutable'
 
-const paymentMethods = (state = List(), action) => {
+export const paymentMethods = (state = List(), action) => {
     switch (action.type) {
     case 'ADD_METHOD':
         return state.push({
@@ -28,7 +28,7 @@ const initialDetails = List([
     {label: 'Amount', value: '10.50', key: 'value'}
 ])
 
-const details = (state = initialDetails, action) => {
+export const details = (state = initialDetails, action) => {
     switch (action.type) {
     case 'SET_DETAIL_VALUE':
         return state.update(
@@ -42,7 +42,7 @@ const details = (state = initialDetails, action) => {
     }
 }
 
-const error = (state = null, action) => {
+export const error = (state = null, action) => {
     switch (action.type) {
     case 'SET_ERROR':
         return action.error
@@ -53,7 +53,7 @@ const error = (state = null, action) => {
     }
 }
 
-const result = (state = {}, action) => {
+export const result = (state = {}, action) => {
     switch (action.type) {
     case 'SET_RESULT':
         return {
@@ -70,7 +70,7 @@ const result = (state = {}, action) => {
 }
 
 /* eslint-disable no-case-declarations */
-const shipping = (state = {free: false, paid: false}, action) => {
+export const shipping = (state = {free: false, paid: false}, action) => {
     switch (action.type) {
     case 'FLIP_SHIPPING_FLAG':
         const result = {...state}
@@ -81,7 +81,7 @@ const shipping = (state = {free: false, paid: false}, action) => {
     }
 }
 
-const misc = (state = {email: false, phone: false}, action) => {
+export const misc = (state = {email: false, phone: false}, action) => {
     switch (action.type) {
     case 'FLIP_MISC_FLAG':
         const result = {...state}
