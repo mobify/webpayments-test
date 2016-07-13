@@ -48,6 +48,15 @@ const featureDetect = (next) => () => {
 // Pass the Redux state to the remaining code as a function parameter.
 const connectState = (next) => () => { next(store.getState()) }
 
+const stripImmutable= (next) => ({paymentMethods, details, shipping, misc}) => {
+    next({
+        paymentMethods: paymentMethods.toJS(),
+        details: details.toJS(),
+        shipping: shipping.toJS(),
+        misc: misc.toJS()
+    })
+}
+
 // Convert the Redux state of the payment method options to
 // a valid supportedInstruments parameter.
 const processMethods = (paymentMethods) => {
@@ -62,7 +71,6 @@ const processMethods = (paymentMethods) => {
                   data: options
               }
           })
-          .toArray()
 
     if (supportedInstruments.length === 0) {
         return null
@@ -73,7 +81,7 @@ const processMethods = (paymentMethods) => {
 // Converts the total in the Redux state to a value object.
 const processDetails = (details) => {
     const detailDigest = _.object(
-        details.map(({key, value}) => [key, value]).toArray()
+        details.map(({key, value}) => [key, value])
     )
     return {
         label: detailDigest.label,
@@ -168,9 +176,11 @@ const processResponse = (response) => {
 
 const onInitiate = featureDetect(
     connectState(
-        transformState(
-            makeRequest(
-                processResponse
+        stripImmutable(
+            transformState(
+                makeRequest(
+                    processResponse
+                )
             )
         )
     )
