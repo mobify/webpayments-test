@@ -1,5 +1,5 @@
 import {combineReducers} from 'redux'
-import {List, Map, fromJS} from 'immutable'
+import {List, Map} from 'immutable'
 
 const initialMethods = List.of(
     Map({name: 'Visa', value: 'visa', options: {}, active: true}),
@@ -9,13 +9,13 @@ const initialMethods = List.of(
 
 export const paymentMethods = (state = initialMethods, action) => {
     switch (action.type) {
-        case 'TOGGLE_METHOD':
-            return state.update(
+    case 'TOGGLE_METHOD':
+        return state.update(
                 action.index,
-                (method) => method.update('active', value => !value)
+                (method) => method.update('active', (value) => !value)
             )
-        default:
-            return state
+    default:
+        return state
     }
 }
 
@@ -27,13 +27,13 @@ const initialDetails = List.of(
 
 export const details = (state = initialDetails, action) => {
     switch (action.type) {
-        case 'SET_DETAIL_VALUE':
-            return state.update(
+    case 'SET_DETAIL_VALUE':
+        return state.update(
                 action.index,
                 (detail) => detail.set('value', action.value)
             )
-        default:
-            return state
+    default:
+        return state
     }
 }
 
@@ -67,25 +67,25 @@ export const result = (state = {}, action) => {
 /* eslint-disable no-case-declarations */
 export const shipping = (state = Map({free: false, paid: false}), action) => {
     switch (action.type) {
-        case 'FLIP_SHIPPING_FLAG':
-            return state.update(
+    case 'FLIP_SHIPPING_FLAG':
+        return state.update(
                 action.flag,
-                flag => !flag
+                (flag) => !flag
             )
-        default:
-            return state
+    default:
+        return state
     }
 }
 
 export const misc = (state = Map({email: false, phone: false}), action) => {
     switch (action.type) {
-        case 'FLIP_MISC_FLAG':
-            return state.update(
+    case 'FLIP_MISC_FLAG':
+        return state.update(
                 action.flag,
-                flag => !flag
+                (flag) => !flag
             )
-        default:
-            return state
+    default:
+        return state
     }
 }
 /* eslint-enable no-case-declarations */

@@ -1,10 +1,10 @@
 import test from 'ava'
 
+import * as Actions from './actions'
 import * as Reducers from './reducers'
-import * as _ from 'underscore'
-import {List, Map, fromJS, is} from 'immutable'
+import {fromJS, is} from 'immutable'
 
-test('paymentMethods: toggleMethod toggles a method', t => {
+test('paymentMethods: toggleMethod toggles a method', (t) => {
     t.true(is(
         Reducers.paymentMethods(
             fromJS([{
@@ -13,10 +13,7 @@ test('paymentMethods: toggleMethod toggles a method', t => {
                 options: {},
                 active: false
             }]),
-            {
-                type: 'TOGGLE_METHOD',
-                index: 0
-            }
+            Actions.toggleMethod(0)
         ),
         fromJS([{
             name: 'Test',
@@ -34,10 +31,7 @@ test('paymentMethods: toggleMethod toggles a method', t => {
                 options: {},
                 active: true
             }]),
-            {
-                type: 'TOGGLE_METHOD',
-                index: 0
-            }
+            Actions.toggleMethod(0)
         ),
         fromJS([{
             name: 'Test',
@@ -59,11 +53,7 @@ test('details: SET_DETAIL_VALUE works', (t) => {
                     key: 'test'
                 }
             ]),
-            {
-                type: 'SET_DETAIL_VALUE',
-                index: 1,
-                value: 'new_test'
-            }
+            Actions.setDetailValue(1, 'new_test')
         ),
         fromJS([
             {},
@@ -85,17 +75,14 @@ test('error: initial state is null', (t) => {
 
 test('error: sets string with SET_ERROR', (t) => {
     t.is(
-        Reducers.error('input', {
-            type: 'SET_ERROR',
-            error: 'output'
-        }),
+        Reducers.error('input', Actions.setError('output')),
         'output'
     )
 })
 
 test('error: clears string on SET_RESULT', (t) => {
     t.is(
-        Reducers.error('input', {type: 'SET_RESULT'}),
+        Reducers.error('input', Actions.setResult({})),
         null
     )
 })

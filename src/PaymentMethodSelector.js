@@ -1,6 +1,8 @@
 import React from 'react'
 import {connect} from 'react-redux'
 
+import {toggleMethod} from './actions'
+
 const PaymentMethod = ({name, active, onChange}) => {
     return (
         <li>
@@ -33,10 +35,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         onChange: (idx) => {
-            dispatch({
-                type: 'TOGGLE_METHOD',
-                index: idx
-            })
+            dispatch(toggleMethod(idx))
         }
     }
 }

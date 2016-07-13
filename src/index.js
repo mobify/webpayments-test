@@ -6,6 +6,7 @@ import _ from 'underscore'
 
 import App from './App'
 import reducer from './reducers'
+import {setError, setResult} from './actions'
 
 let store = createStore(reducer, {}, window.devToolsExtension && window.devToolsExtension())
 
@@ -19,18 +20,15 @@ const featureDetect = (next) => () => {
         next()
         return
     }
-    store.dispatch({
-        type: 'SET_ERROR',
-        /* eslint-disable max-len */
-        error: 'Payment Request not supported, must have Chrome Dev with chrome://flags/#enable-experimental-web-platform-features enabled'
-        /* eslint-enable max-len */
-    })
+    store.dispatch(setError(
+        'Payment Request not supported, must have Chrome Dev with chrome://flags/#enable-experimental-web-platform-features enabled'
+    ))
 }
 
 // Pass the Redux state to the remaining code as a function parameter.
 const connectState = (next) => () => { next(store.getState()) }
 
-const stripImmutable= (next) => ({paymentMethods, details, shipping, misc}) => {
+const stripImmutable = (next) => ({paymentMethods, details, shipping, misc}) => {
     next({
         paymentMethods: paymentMethods.toJS(),
         details: details.toJS(),
@@ -104,10 +102,7 @@ const transformState = (next) => ({paymentMethods, details, shipping, misc}) => 
         return
     }
 
-    store.dispatch({
-        type: 'SET_ERROR',
-        error: 'Must provide at least one payment method'
-    })
+    store.dispatch(setError('Must provide at least one payment method'))
 }
 
 const makeRequest = (next) => ({supportedInstruments, total, shippingOptions, misc}) => {
@@ -128,10 +123,7 @@ const makeRequest = (next) => ({supportedInstruments, total, shippingOptions, mi
         .then(next)
         .catch((newError) => {
             console.log(newError.message)
-            store.dispatch({
-                type: 'SET_ERROR',
-                error: newError.message
-            })
+            store.dispatch(setError(newError.message))
         })
 }
 
@@ -139,8 +131,7 @@ const processResponse = (response) => {
     response.complete()
         .then(() => {
             console.log(response)
-            store.dispatch({
-                type: 'SET_RESULT',
+            store.dispatch(setResult({
                 details: response.details,
                 address: response.shippingAddress && {
                     recipient: response.shippingAddress.recipient,
@@ -152,7 +143,7 @@ const processResponse = (response) => {
                 },
                 email: response.payerEmail,
                 phone: response.payerPhone
-            })
+            }))
         })
 }
 

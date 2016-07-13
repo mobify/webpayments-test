@@ -1,6 +1,7 @@
 import React from 'react'
 import {connect} from 'react-redux'
 import PaymentMethodSelector from './PaymentMethodSelector'
+import {setDetailValue, flipShippingFlag, flipMiscFlag} from './actions'
 
 /**
  * The UI components for the demo app.
@@ -29,7 +30,11 @@ let AmountEditor = ({details, onChange}) => {
             <h2>Specify amount:</h2>
             <ul>
                 {details.map((detail, idx) =>
-                    <AmountEditorItem key={idx} {...detail} onChange={onChange.bind(null, idx)} />)}
+                    <AmountEditorItem
+                        key={idx}
+                        {...detail}
+                        onChange={({target}) => onChange(idx, target)}
+                    />)}
             </ul>
         </div>
     )
@@ -43,12 +48,10 @@ AmountEditor = connect(
     },
     (dispatch) => {
         return {
-            onChange: (idx, {target}) => {
-                dispatch({
-                    type: 'SET_DETAIL_VALUE',
-                    index: idx,
-                    value: target.value
-                })
+            onChange: (idx, target) => {
+                dispatch(
+                    setDetailValue(idx, target.value)
+                )
             }
         }
     }
@@ -84,10 +87,7 @@ ShippingOptions = connect(
     (dispatch) => {
         return {
             onChange: (flag) => {
-                dispatch({
-                    type: 'FLIP_SHIPPING_FLAG',
-                    flag
-                })
+                dispatch(flipShippingFlag(flag))
             }
         }
     }
@@ -100,10 +100,7 @@ const MiscOptions = connect(
     (dispatch) => {
         return {
             onChange: (flag) => {
-                dispatch({
-                    type: 'FLIP_MISC_FLAG',
-                    flag
-                })
+                dispatch(flipMiscFlag(flag))
             }
         }
     }
