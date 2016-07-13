@@ -4,32 +4,6 @@ import * as Reducers from './reducers'
 import * as _ from 'underscore'
 import {List, Map, fromJS, is} from 'immutable'
 
-test('paymentMethods: initial state', t => {
-    const initial = Reducers.paymentMethods(undefined, {})
-
-    t.is(initial, List())
-})
-
-test('paymentMethods: add method adds a method to the list', t => {
-    t.true(is(
-        Reducers.paymentMethods(
-            List(),
-            {
-                type: 'ADD_METHOD',
-                name: 'Test',
-                value: 'text',
-                options: {}
-            }
-        ),
-        List.of(Map({
-            name: 'Test',
-            value: 'text',
-            options: Map({}),
-            active: true,
-        }))
-    ))
-})
-
 test('paymentMethods: toggleMethod toggles a method', t => {
     t.true(is(
         Reducers.paymentMethods(

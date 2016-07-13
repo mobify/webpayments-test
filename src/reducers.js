@@ -1,15 +1,14 @@
 import {combineReducers} from 'redux'
 import {List, Map, fromJS} from 'immutable'
 
-export const paymentMethods = (state = List(), action) => {
+const initialMethods = List.of(
+    Map({name: 'Visa', value: 'visa', options: {}, active: true}),
+    Map({name: 'MasterCard', value: 'mastercard', options: {}, active: false}),
+    Map({name: 'American Express', value: 'amex', options: {}, active: false})
+)
+
+export const paymentMethods = (state = initialMethods, action) => {
     switch (action.type) {
-        case 'ADD_METHOD':
-            return state.push(Map({
-                name: action.name,
-                value: action.value,
-                options: Map(action.options),
-                active: state.size === 0
-            }))
         case 'TOGGLE_METHOD':
             return state.update(
                 action.index,

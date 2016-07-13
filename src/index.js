@@ -9,24 +9,6 @@ import reducer from './reducers'
 
 let store = createStore(reducer, {}, window.devToolsExtension && window.devToolsExtension())
 
-store.dispatch({
-    type: 'ADD_METHOD',
-    name: 'Visa',
-    value: 'visa'
-})
-
-store.dispatch({
-    type: 'ADD_METHOD',
-    name: 'MasterCard',
-    value: 'mastercard'
-})
-
-store.dispatch({
-    type: 'ADD_METHOD',
-    name: 'American Express',
-    value: 'amex'
-})
-
 //* *******
 // The following sequence of functions implements the call to the Web
 // Payments API, based on the parameters in the Redux store.
