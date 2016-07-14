@@ -20,6 +20,7 @@
     "babel-register": "^6.9.0",
     "eslint": "^3.0.1",
     "eslint-import-resolver-webpack": "^0.3.2",
+    "eslint-plugin-ava": "^2.5.0",
     "eslint-plugin-import": "^1.10.2",
     "eslint-plugin-react": "^3.6.2",
     "mobify-code-style": "^2.5.0",
