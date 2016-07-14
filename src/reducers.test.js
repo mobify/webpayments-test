@@ -73,16 +73,52 @@ test('error: initial state is null', (t) => {
     )
 })
 
-test('error: sets string with SET_ERROR', (t) => {
+test('error: sets string when error set', (t) => {
     t.is(
         Reducers.error('input', Actions.setError('output')),
         'output'
     )
 })
 
-test('error: clears string on SET_RESULT', (t) => {
+test('error: clears string when result set', (t) => {
     t.is(
         Reducers.error('input', Actions.setResult({})),
         null
     )
+})
+
+test('shipping: flips flag correctly', (t) => {
+    t.true(is(
+        Reducers.shipping(
+            fromJS({thing: true, otherThing: false}),
+            Actions.flipShippingFlag('thing')
+        ),
+        fromJS({thing: false, otherThing: false})
+    ))
+
+    t.true(is(
+        Reducers.shipping(
+            fromJS({thing: true, otherThing: false}),
+            Actions.flipShippingFlag('otherThing')
+        ),
+        fromJS({thing: true, otherThing: true})
+    ))
+})
+
+test('misc: flips flag correctly', (t) => {
+    t.true(is(
+        Reducers.misc(
+            fromJS({thing: true, otherThing: false}),
+            Actions.flipMiscFlag('thing')
+        ),
+        fromJS({thing: false, otherThing: false})
+    ))
+
+    t.true(is(
+        Reducers.misc(
+            fromJS({thing: true, otherThing: false}),
+            Actions.flipMiscFlag('otherThing')
+        ),
+        fromJS({thing: true, otherThing: true})
+    ))
 })
