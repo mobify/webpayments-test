@@ -1,42 +1,11 @@
-export const toggleMethod = (index) => {
-    return {
-        type: 'TOGGLE_METHOD',
-        index
-    }
-}
+import {createAction} from 'redux-act'
 
-export const setDetailValue = (index, value) => {
-    return {
-        type: 'SET_DETAIL_VALUE',
-        index,
-        value
-    }
-}
-
-export const setError = (error) => {
-    return {
-        type: 'SET_ERROR',
-        error
-    }
-}
-
-export const setResult = (resultInfo) => {
-    return {
-        type: 'SET_RESULT',
-        ...resultInfo
-    }
-}
-
-export const flipShippingFlag = (flag) => {
-    return {
-        type: 'FLIP_SHIPPING_FLAG',
-        flag
-    }
-}
-
-export const flipMiscFlag = (flag) => {
-    return {
-        type: 'FLIP_MISC_FLAG',
-        flag
-    }
-}
+export const toggleMethod = createAction('Toggle payment method')
+export const setDetailValue = createAction(
+    'Set detail value',
+    (index, value) => { return {index, value} }
+)
+export const setError = createAction('Set error message')
+export const setResult = createAction('Set result information')
+export const flipShippingFlag = createAction('Flip shipping flag')
+export const flipMiscFlag = createAction('Flip misc flag')
