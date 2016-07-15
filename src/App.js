@@ -7,7 +7,7 @@ import {setDetailValue, flipShippingFlag, flipMiscFlag} from './actions'
  * The UI components for the demo app.
  */
 
-const AmountEditorItem = ({label, value, onChange}) => {
+export const AmountEditorItem = ({label, value, onChange}) => {
     return (
         <li>
             <label>

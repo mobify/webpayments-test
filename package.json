@@ -7,7 +7,7 @@
     "start:dev": "node server.js",
     "start": "npm run build && node express.js",
     "lint": "eslint src",
-    "test": "ava"
+    "test": "ava --verbose"
   },
   "ava": {
     "babel": "inherit",
@@ -18,12 +18,15 @@
   "devDependencies": {
     "ava": "^0.15.2",
     "babel-register": "^6.9.0",
+    "enzyme": "^2.4.1",
     "eslint": "^3.0.1",
     "eslint-import-resolver-webpack": "^0.3.2",
     "eslint-plugin-ava": "^2.5.0",
     "eslint-plugin-import": "^1.10.2",
     "eslint-plugin-react": "^3.6.2",
     "mobify-code-style": "^2.5.0",
+    "react-addons-test-utils": "^15.2.1",
+    "sinon": "^1.17.4",
     "webpack-dev-server": "^1.12.1"
   },
   "dependencies": {

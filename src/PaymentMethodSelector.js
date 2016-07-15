@@ -3,7 +3,7 @@ import {connect} from 'react-redux'
 
 import {toggleMethod} from './actions'
 
-const PaymentMethod = ({name, active, onChange}) => {
+export const PaymentMethod = ({name, active, onChange}) => {
     return (
         <li>
             <label>
@@ -14,7 +14,7 @@ const PaymentMethod = ({name, active, onChange}) => {
     )
 }
 
-let PaymentMethodSelector = ({methods, onChange}) => {
+export const PaymentMethodSelectorComponent = ({methods, onChange}) => {
     return (
         <div>
             <h2>Select Payment Method:</h2>
@@ -40,6 +40,6 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-PaymentMethodSelector = connect(mapStateToProps, mapDispatchToProps)(PaymentMethodSelector)
+const PaymentMethodSelector = connect(mapStateToProps, mapDispatchToProps)(PaymentMethodSelectorComponent)
 
 export default PaymentMethodSelector
