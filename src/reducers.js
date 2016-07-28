@@ -40,7 +40,7 @@ export const error = createReducer({
 }, null)
 
 export const result = createReducer({
-    [Actions.setError]: () => {},
+    [Actions.setError]: () => null,
     [Actions.setResult]: (state, {details, address, email, phone}) => {
         return {details, address, email, phone}
     }
