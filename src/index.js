@@ -122,8 +122,8 @@ const makeRequest = (next) => ({supportedInstruments, total, shippingOptions, mi
     request.show()
         .then(next)
         .catch((newError) => {
-            console.log(newError.message)
-            store.dispatch(setError(newError.message))
+            console.log(newError.message || newError)
+            store.dispatch(setError(newError.message || newError))
         })
 }
 

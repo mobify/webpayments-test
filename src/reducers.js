@@ -35,7 +35,7 @@ export const details = createReducer({
 }, initialDetails)
 
 export const error = createReducer({
-    [Actions.setError]: (state, error) => error,
+    [Actions.setError]: (state, error) => { return error },
     [Actions.setResult]: () => null
 }, null)
 
