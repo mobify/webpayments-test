@@ -52,7 +52,8 @@ const initialState = ({shipping}) => {
     }
     return {
         currentShipping: Object.keys(shipping).filter((id) => shipping[id].default)[0],
-        availableShipping: Object.keys(shipping).length > 1 ? undefined : Object.keys(shipping)
+        availableShipping: Object.keys(shipping).length > 1 ? undefined : Object.keys(shipping),
+        taxes: [{label: 'GST', rate: 0.05}, {label: 'PST', rate: 0.075}]
     }
 }
 
@@ -60,11 +61,18 @@ const produceDetails = (
     {currency, subtotal, shipping},
     {currentShipping, availableShipping}
 ) => {
-    const total = subtotal + (currentShipping ? shipping[currentShipping].cost : 0)
+    const taxes = [{label: 'GST', rate: 0.05}, {label: 'PST', rate: 0.075}]
+    const taxValueList = taxes.map(({label, rate}) => {
+        return {label, cost: subtotal * rate}
+    })
+    console.log(taxValueList)
+
+    const total = subtotal + (currentShipping ? shipping[currentShipping].cost : 0) + taxValueList.reduce((sum, {cost}) => sum + cost, 0)
 
     return {
         displayItems: [
-            buildAmount('Subtotal', currency, subtotal)
+            buildAmount('Subtotal', currency, subtotal),
+            ...(taxValueList.map(({label, cost}) => buildAmount(label, currency, cost)))
         ],
         shippingOptions: availableShipping &&
             availableShipping.map((id) => {
