@@ -7,6 +7,7 @@ import _ from 'underscore'
 import App from './App'
 import reducer from './reducers'
 import {setError, setResult} from './actions'
+import {buildRequest, performRequest} from './request-wrapper'
 
 let store = createStore(reducer, {}, window.devToolsExtension && window.devToolsExtension())
 
@@ -40,22 +41,10 @@ const stripImmutable = (next) => ({paymentMethods, details, shipping, misc}) => 
 // Convert the Redux state of the payment method options to
 // a valid supportedInstruments parameter.
 const processMethods = (paymentMethods) => {
-    const supportedInstruments = paymentMethods
+    const creditCards = paymentMethods
           .filter((method) => method.active)
-          .map(({value, options}) => {
-              return {
-                  supportedMethods: [value],
-                   // Each payment method can have an options object
-                   // associated with it. Credit cards do not use this
-                   // but e.g. Android Pay would.
-                  data: options
-              }
-          })
-
-    if (supportedInstruments.length === 0) {
-        return null
-    }
-    return supportedInstruments
+          .map(({value}) => value)
+    return {creditCards}
 }
 
 // Converts the total in the Redux state to a value object.
@@ -64,8 +53,8 @@ const processDetails = (details) => {
         details.map(({key, value}) => [key, value])
     )
     return {
-        label: detailDigest.label,
-        amount: {currency: detailDigest.currency, value: detailDigest.value}
+        subtotal: detailDigest.value,
+        currency: detailDigest.currency
     }
 }
 
@@ -93,21 +82,17 @@ const processShipping = ({free, paid}, currency) => {
 }
 
 const transformState = (next) => ({paymentMethods, details, shipping, misc}) => {
-    const supportedInstruments = processMethods(paymentMethods)
-    const total = processDetails(details)
-    const shippingOptions = processShipping(shipping, total.amount.currency)
-
-    if (supportedInstruments) {
-        next({supportedInstruments, total, shippingOptions, misc})
-        return
+    const data = {
+            ...processMethods(paymentMethods),
+            ...processDetails(details)
     }
+    const shippingOptions = processShipping(shipping, data.currency)
 
-    store.dispatch(setError('Must provide at least one payment method'))
+    next({data, shippingOptions, misc})
 }
 
-const makeRequest = (next) => ({supportedInstruments, total, shippingOptions, misc}) => {
+const makeRequest = (next) => ({data, shippingOptions, misc}) => {
     const details = {
-        total,
         shippingOptions
     }
 
@@ -117,14 +102,21 @@ const makeRequest = (next) => ({supportedInstruments, total, shippingOptions, mi
         requestPayerEmail: misc.email
     }
 
-    const request = new PaymentRequest(supportedInstruments, details, options)
+    let request
+    try {
+        request = buildRequest(data, details, options)
+    } catch (err) {
+        store.dispatch(setError(err.message))
+    }
 
-    request.show()
-        .then(next)
-        .catch((newError) => {
+    performRequest(
+        request,
+        next,
+        (newError) => {
             console.log(newError.message || newError)
             store.dispatch(setError(newError.message || newError))
-        })
+        }
+    )
 }
 
 const processResponse = (response) => {
