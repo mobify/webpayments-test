@@ -28,6 +28,25 @@ const buildAmount = (label, currency, value) => {
     }
 }
 
+const buildShippingDetails = (shippingOptions, currency) => {
+    return shippingOptions.map(({id, label, value}) => {
+        return {
+            ...buildAmount(label, currency, value),
+            id
+        }
+    })
+}
+
+const getCurrentShipping = ({shippingOptions}) => {
+    if (!shippingOptions) {
+        return null
+    }
+
+    return shippingOptions.reduce((last, current) => {
+        return current.selected ? current : last
+    })
+}
+
 const calculateTotal = (details, currency) => {
     const {displayItems} = details
 
@@ -40,19 +59,28 @@ const calculateTotal = (details, currency) => {
     return details
 }
 
-const buildDetails = ({subtotal, currency}) => {
+const buildDetails = ({subtotal, currency, shippingOptions}) => {
     let details = {}
+
+    if (shippingOptions && shippingOptions.length > 0) {
+        details.shippingOptions = buildShippingDetails(shippingOptions, currency)
+        details.shippingOptions[0].selected = true
+    }
 
     details.displayItems = [
         buildAmount('Subtotal', currency, subtotal)
     ]
+
+    if (details.shippingOptions) {
+        details.displayItems.push(getCurrentShipping(details))
+    }
 
     details = calculateTotal(details, currency)
 
     return details
 }
 
-export const buildRequest = (data, details, options) => {
+export const buildRequest = (data, options) => {
     const request = new PaymentRequest(buildInstruments(data), buildDetails(data), options)
 
     request.addEventListener('shippingoptionchange', (evt) => {

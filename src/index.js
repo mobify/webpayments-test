@@ -58,53 +58,46 @@ const processDetails = (details) => {
     }
 }
 
-const processShipping = ({free, paid}, currency) => {
+const processShipping = ({free, paid}) => {
     const shippingOptions = []
 
     if (free) {
         shippingOptions.push({
             id: 'freeShipping',
             label: 'Free Shipping',
-            amount: {currency, value: '0.00'}
+            value: '0.00'
         })
     }
     if (paid) {
         shippingOptions.push({
             id: 'paidShipping',
             label: 'Premium Shipping',
-            amount: {currency, value: '5.00'}
+            value: '5.00'
         })
     }
-    if (shippingOptions.length > 0) {
-        shippingOptions[0].selected = true
-    }
-    return shippingOptions
+    return shippingOptions.length > 0 ? {shippingOptions} : {}
 }
 
 const transformState = (next) => ({paymentMethods, details, shipping, misc}) => {
     const data = {
             ...processMethods(paymentMethods),
-            ...processDetails(details)
+            ...processDetails(details),
+            ...processShipping(shipping)
     }
-    const shippingOptions = processShipping(shipping, data.currency)
 
-    next({data, shippingOptions, misc})
+    next({data, misc})
 }
 
-const makeRequest = (next) => ({data, shippingOptions, misc}) => {
-    const details = {
-        shippingOptions
-    }
-
+const makeRequest = (next) => ({data, misc}) => {
     const options = {
-        requestShipping: shippingOptions.length > 0,
+        requestShipping: data.shippingOptions.length > 0,
         requestPayerPhone: misc.phone,
         requestPayerEmail: misc.email
     }
 
     let request
     try {
-        request = buildRequest(data, details, options)
+        request = buildRequest(data, options)
     } catch (err) {
         store.dispatch(setError(err.message))
     }
