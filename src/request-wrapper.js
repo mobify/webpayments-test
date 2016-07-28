@@ -20,6 +20,14 @@ const buildInstruments = ({creditCards, androidPay}) => {
     return supportedInstruments
 }
 
+const buildOptions = ({shipping, needPhone, needEmail}) => {
+    return {
+        requestShipping: !!shipping,
+        requestPayerPhone: needPhone,
+        requestPayerEmail: needEmail
+    }
+}
+
 const buildAmount = (label, currency, value) => {
     value = `${value}`
     return {
@@ -28,13 +36,23 @@ const buildAmount = (label, currency, value) => {
     }
 }
 
+const availableShippingMethods = ({shipping}, addressInfo) => {
+    return Object.keys(shipping)
+        .filter((id) => {
+            if (!shipping[id].addressPredicate) {
+                return true
+            }
+            return shipping[id].addressPredicate(addressInfo)
+        })
+}
+
 const initialState = ({shipping}) => {
     if (!shipping) {
         return {}
     }
     return {
         currentShipping: Object.keys(shipping).filter((id) => shipping[id].default)[0],
-        availableShipping: Object.keys(shipping)
+        availableShipping: Object.keys(shipping).length > 1 ? undefined : Object.keys(shipping)
     }
 }
 
@@ -61,17 +79,24 @@ const produceDetails = (
     }
 }
 
-export const buildRequest = (input, options) => {
+const processAddress = (address) => {
+    return {
+        city: address.city,
+        region: address.region,
+        postalCode: address.postalCode,
+        country: address.country
+    }
+}
+
+export const buildRequest = (input) => {
     let state = initialState(input)
 
     const details = produceDetails(input, state)
-    console.log(details)
-    console.log(state)
 
     const request = new PaymentRequest(
         buildInstruments(input),
         details,
-        options
+        buildOptions(input)
     )
 
     request.addEventListener('shippingoptionchange', (evt) => {
@@ -79,6 +104,17 @@ export const buildRequest = (input, options) => {
             ...state,
             currentShipping: request.shippingOption
         }
+        evt.updateWith(Promise.resolve(produceDetails(input, state)))
+    })
+
+    request.addEventListener('shippingaddresschange', (evt) => {
+        const addressInfo = processAddress(request.shippingAddress)
+        state = {
+            ...state,
+            addressInfo,
+            availableShipping: availableShippingMethods(input, addressInfo)
+        }
+        console.log(state)
         evt.updateWith(Promise.resolve(produceDetails(input, state)))
     })
 

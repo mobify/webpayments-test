@@ -80,31 +80,31 @@ const processShipping = ({free, paid}) => {
     return {shipping}
 }
 
+const processMisc = ({phone, email}) => {
+    return {
+        needPhone: phone,
+        needEmail: email
+    }
+}
+
 const transformState = (next) => ({paymentMethods, details, shipping, misc}) => {
     const data = {
             ...processMethods(paymentMethods),
             ...processDetails(details),
-            ...processShipping(shipping)
+            ...processShipping(shipping),
+            ...processMisc(misc)
     }
 
-    next({data, misc})
+    next(data)
 }
 
-const makeRequest = (next) => ({data, misc}) => {
-    const options = {
-        requestShipping: !!data.shipping,
-        requestPayerPhone: misc.phone,
-        requestPayerEmail: misc.email
-    }
-
-    console.log(data)
-    console.log(options)
-
+const makeRequest = (next) => (data) => {
     let request
     try {
-        request = buildRequest(data, options)
+        request = buildRequest(data)
     } catch (err) {
         store.dispatch(setError(err.message))
+        return
     }
 
     performRequest(
