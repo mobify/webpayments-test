@@ -53,29 +53,31 @@ const processDetails = (details) => {
         details.map(({key, value}) => [key, value])
     )
     return {
-        subtotal: detailDigest.value,
+        subtotal: parseFloat(detailDigest.value),
         currency: detailDigest.currency
     }
 }
 
 const processShipping = ({free, paid}) => {
-    const shippingOptions = []
+    const shipping = {}
 
     if (free) {
-        shippingOptions.push({
-            id: 'freeShipping',
+        shipping.free = {
             label: 'Free Shipping',
-            value: '0.00'
-        })
+            cost: 0.00
+        }
     }
     if (paid) {
-        shippingOptions.push({
-            id: 'paidShipping',
+        shipping.paid = {
             label: 'Premium Shipping',
-            value: '5.00'
-        })
+            cost: 5.00
+        }
     }
-    return shippingOptions.length > 0 ? {shippingOptions} : {}
+    if (!free || !paid) {
+        return {}
+    }
+    shipping[Object.keys(shipping)[0]].default = true
+    return {shipping}
 }
 
 const transformState = (next) => ({paymentMethods, details, shipping, misc}) => {
@@ -90,10 +92,13 @@ const transformState = (next) => ({paymentMethods, details, shipping, misc}) => 
 
 const makeRequest = (next) => ({data, misc}) => {
     const options = {
-        requestShipping: data.shippingOptions.length > 0,
+        requestShipping: !!data.shipping,
         requestPayerPhone: misc.phone,
         requestPayerEmail: misc.email
     }
+
+    console.log(data)
+    console.log(options)
 
     let request
     try {
