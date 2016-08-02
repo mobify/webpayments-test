@@ -1,3 +1,5 @@
+import {roundPrice, buildAmount, processAddress} from './payment-request-utils'
+
 const buildInstruments = ({creditCards, androidPay}) => {
     const supportedInstruments = []
 
@@ -28,14 +30,6 @@ const buildOptions = ({shipping, needPhone, needEmail}) => {
     }
 }
 
-const buildAmount = (label, currency, value) => {
-    value = `${value}`
-    return {
-        label,
-        amount: {currency, value}
-    }
-}
-
 const availableShippingMethods = ({shipping}, addressInfo) => {
     return Object.keys(shipping)
         .filter((id) => {
@@ -59,15 +53,15 @@ const initialState = ({shipping}) => {
 
 const produceDetails = (
     {currency, subtotal, shipping},
-    {currentShipping, availableShipping}
+    {currentShipping, availableShipping, taxes = []}
 ) => {
-    const taxes = [{label: 'GST', rate: 0.05}, {label: 'PST', rate: 0.075}]
     const taxValueList = taxes.map(({label, rate}) => {
-        return {label, cost: subtotal * rate}
+        return {label, cost: roundPrice(subtotal * rate)}
     })
-    console.log(taxValueList)
 
-    const total = subtotal + (currentShipping ? shipping[currentShipping].cost : 0) + taxValueList.reduce((sum, {cost}) => sum + cost, 0)
+    const total = subtotal +
+              (currentShipping ? shipping[currentShipping].cost : 0) +
+              taxValueList.reduce((sum, {cost}) => sum + cost, 0)
 
     return {
         displayItems: [
@@ -87,12 +81,19 @@ const produceDetails = (
     }
 }
 
-const processAddress = (address) => {
+const changeShipping = (state, shipping) => {
     return {
-        city: address.city,
-        region: address.region,
-        postalCode: address.postalCode,
-        country: address.country
+        ...state,
+        currentShipping: shipping
+    }
+}
+
+const changeAddress = (input, state, address) => {
+    const addressInfo = processAddress(address)
+    return {
+        ...state,
+        addressInfo,
+        availableShipping: availableShippingMethods(input, addressInfo)
     }
 }
 
@@ -108,21 +109,12 @@ export const buildRequest = (input) => {
     )
 
     request.addEventListener('shippingoptionchange', (evt) => {
-        state = {
-            ...state,
-            currentShipping: request.shippingOption
-        }
+        state = changeShipping(state, request.shippingOption)
         evt.updateWith(Promise.resolve(produceDetails(input, state)))
     })
 
     request.addEventListener('shippingaddresschange', (evt) => {
-        const addressInfo = processAddress(request.shippingAddress)
-        state = {
-            ...state,
-            addressInfo,
-            availableShipping: availableShippingMethods(input, addressInfo)
-        }
-        console.log(state)
+        state = changeAddress(input, state, request.shippingAddress)
         evt.updateWith(Promise.resolve(produceDetails(input, state)))
     })
 
